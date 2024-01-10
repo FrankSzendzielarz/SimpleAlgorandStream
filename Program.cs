@@ -35,16 +35,18 @@ namespace SimpleAlgorandStream
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.Configure<AlgodSource>(hostContext.Configuration.GetSection("AlgodSource"));
+                    services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
-                            .AddPolicyHandler(_=>
+                            .AddPolicyHandler((x) =>
                             {
+
                                 //using a dynamic policy to allow for configuration changes
                                 var algodSourceConfig = hostContext.Configuration.GetSection("AlgodSource").Get<AlgodSource>();
                                 if (algodSourceConfig == null) throw new Exception("Cannot start service without AlgodSource configuration");
                                 return configureSourcePolicy(algodSourceConfig);
                             });
 
-                    services.AddHostedService<StatePumpService>();
+                    
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {

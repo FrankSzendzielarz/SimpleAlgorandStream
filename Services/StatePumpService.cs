@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly.Extensions.Http;
+using Polly;
 using SimpleAlgorandStream.Config;
 
 namespace SimpleAlgorandStream.Services
@@ -11,22 +13,32 @@ namespace SimpleAlgorandStream.Services
         private readonly IOptionsMonitor<AlgodSource> _optionsMonitor;
         private HttpClient _client;
         private DefaultApi _algorand;
+        private IHttpClientFactory _clientFactory;
         private readonly ILogger<StatePumpService> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+        
+
 
         public StatePumpService(IOptionsMonitor<AlgodSource> optionsMonitor, IHttpClientFactory clientFactory, ILogger<StatePumpService> logger)
         {
             _optionsMonitor = optionsMonitor;
+            _optionsMonitor.OnChange(_ =>
+            {
+                setupClient();
+            });
             _logger = logger;
-            _httpClientFactory = clientFactory;
+            _clientFactory = clientFactory;
+            
             setupClient();
 
         }
 
+
+      
+
         private void setupClient()
         {
-            _client = _httpClientFactory.CreateClient();
-
+            
+            _client = _clientFactory.CreateClient("StatePumpService");
             _client.BaseAddress = new Uri(_optionsMonitor.CurrentValue.ApiUri);
 
             if (!_client.BaseAddress.IsAbsoluteUri)
@@ -49,6 +61,8 @@ namespace SimpleAlgorandStream.Services
                 _client.DefaultRequestHeaders.Add("X-Algo-API-Token", token);
 
             _algorand = new DefaultApi(_client);
+
+           
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
