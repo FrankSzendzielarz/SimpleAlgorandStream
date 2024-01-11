@@ -1,4 +1,5 @@
 ﻿using Algorand.KMD;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +10,7 @@ using Polly.Extensions.Http;
 using Polly.Retry;
 using SimpleAlgorandStream.Config;
 using SimpleAlgorandStream.Services;
+using SimpleAlgorandStream.SignalR;
 using System;
 
 namespace SimpleAlgorandStream
@@ -45,19 +47,35 @@ namespace SimpleAlgorandStream
                 {
                     services.Configure<AlgodSource>(hostContext.Configuration.GetSection("AlgodSource"));
                     services.Configure<PushTargets>(hostContext.Configuration.GetSection("PushTargets"));
+                    services.AddSignalR();
                     services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
                             .AddPolicyHandler((serviceProvider,x) =>
                             {
                                 ILogger<StatePumpService> logger = serviceProvider.GetRequiredService<ILogger<StatePumpService>>();
                                 //using a dynamic policy to allow for configuration changes
-                                var algodSourceConfig = hostContext.Configuration.GetSection("AlgodSource").Get<AlgodSource>();
-                                if (algodSourceConfig == null) throw new Exception("Cannot start service without AlgodSource configuration");
+                                var algodSourceConfig = hostContext.Configuration.GetSection("AlgodSource").Get<AlgodSource>() ?? throw new Exception("Cannot start service without AlgodSource configuration");
                                 return configureSourcePolicy(algodSourceConfig,logger);
                             });
-
-
+                    services.Configure<KestrelServerOptions>(options =>
+                    {
+                        var pushTargetConfig = hostContext.Configuration.GetSection("PushTargets").Get<PushTargets>() ?? throw new Exception("Cannot start service without PushTarget configuration");
+                        options.ListenAnyIP(pushTargetConfig.SignalR.Port);
+                    });
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.Configure(app =>
+                    {
+                        app.UseRouting();
+                        app.UseEndpoints(endpoints =>
+                        {
+                            var pushTargetConfig = app.ApplicationServices.GetRequiredService<IConfiguration>().GetSection("PushTargets").Get<PushTargets>() ?? throw new Exception("Cannot start service without PushTarget configuration");
+                            endpoints.MapHub<AlgorandHub>($"/{pushTargetConfig.SignalR.HubName}");
+                        });
+                    });
                 });
+            
                 
 
         private static IAsyncPolicy<HttpResponseMessage> configureSourcePolicy(AlgodSource? algodSourceConfig, ILogger<StatePumpService> logger)
