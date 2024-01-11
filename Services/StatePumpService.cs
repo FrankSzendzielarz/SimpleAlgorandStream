@@ -7,6 +7,7 @@ using Polly;
 using SimpleAlgorandStream.Config;
 using Algorand.Algod.Model;
 using Algorand;
+using SimpleAlgorandStream.Algorand;
 
 namespace SimpleAlgorandStream.Services
 {
@@ -14,7 +15,7 @@ namespace SimpleAlgorandStream.Services
     {
         private readonly IOptionsMonitor<AlgodSource> _optionsMonitor;
         private HttpClient _client;
-        private DefaultApi _algorand;
+        private AlgorandApi _algorand;
         private IHttpClientFactory _clientFactory;
         private readonly ILogger<StatePumpService> _logger;
         private readonly IHostApplicationLifetime _appLifetime;
@@ -55,6 +56,7 @@ namespace SimpleAlgorandStream.Services
         {
             
             _client = _clientFactory.CreateClient("StatePumpService");
+            _client.Timeout = Timeout.InfiniteTimeSpan;
             _client.BaseAddress = new Uri(_optionsMonitor.CurrentValue.ApiUri);
 
             if (!_client.BaseAddress.IsAbsoluteUri)
@@ -76,7 +78,7 @@ namespace SimpleAlgorandStream.Services
             if (!String.IsNullOrEmpty(token))
                 _client.DefaultRequestHeaders.Add("X-Algo-API-Token", token);
 
-            _algorand = new DefaultApi(_client);
+            _algorand = new AlgorandApi(_client);
 
            
         }
@@ -96,26 +98,13 @@ namespace SimpleAlgorandStream.Services
 
             }
 
-            //test code:
-            currentRound -= 10;
-            //end test code
-
             while (!stoppingToken.IsCancellationRequested)
             {
 
                 var block=await _algorand.GetBlockAsync(currentRound);
-                try
-                {
-                    var delta = await _algorand.GetLedgerStateDeltaAsync(currentRound);
-                }
-                catch (ApiException<ErrorResponse> ex)
-                {
-                    
-                }
-                catch (Exception ex2)
-                {
-
-                }
+               
+                var delta = await _algorand.GetLedgerStateDeltaAsync(currentRound,Format.Json);
+            
 
                 currentRound++;
                 Thread.Sleep(1000);

@@ -9,6 +9,7 @@ using Polly.Extensions.Http;
 using Polly.Retry;
 using SimpleAlgorandStream.Config;
 using SimpleAlgorandStream.Services;
+using System;
 
 namespace SimpleAlgorandStream
 {
@@ -24,6 +25,14 @@ namespace SimpleAlgorandStream
 
         private static IHostBuilder configure(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    logging.AddConsole();
+                    logging.AddEventSourceLogger();
+                    logging.AddDebug();
+                    logging.AddApplicationInsights();
+                })
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.SetBasePath(Directory.GetCurrentDirectory())
@@ -37,38 +46,33 @@ namespace SimpleAlgorandStream
                     services.Configure<AlgodSource>(hostContext.Configuration.GetSection("AlgodSource"));
                     services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
-                            .AddPolicyHandler((x) =>
+                            .AddPolicyHandler((serviceProvider,x) =>
                             {
-
+                                ILogger<StatePumpService> logger = serviceProvider.GetRequiredService<ILogger<StatePumpService>>();
                                 //using a dynamic policy to allow for configuration changes
                                 var algodSourceConfig = hostContext.Configuration.GetSection("AlgodSource").Get<AlgodSource>();
                                 if (algodSourceConfig == null) throw new Exception("Cannot start service without AlgodSource configuration");
-                                return configureSourcePolicy(algodSourceConfig);
+                                return configureSourcePolicy(algodSourceConfig,logger);
                             });
 
-                    
-                })
-                .ConfigureLogging((hostingContext, logging) =>
-                {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    logging.AddConsole();
-                    logging.AddEventSourceLogger();
-                    logging.AddDebug();
-                    logging.AddApplicationInsights();
+
                 });
+                
 
-        private static IAsyncPolicy<HttpResponseMessage> configureSourcePolicy(AlgodSource? algodSourceConfig)
+        private static IAsyncPolicy<HttpResponseMessage> configureSourcePolicy(AlgodSource? algodSourceConfig, ILogger<StatePumpService> logger)
         {
-
             IAsyncPolicy<HttpResponseMessage> sourcePolicy = null;
             var retryPolicyBuilder = HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.NotFound);
-
-
+                .OrResult(msg => !msg.IsSuccessStatusCode);
+              
             if (algodSourceConfig!.ExponentialBackoff)
             {
-                sourcePolicy = retryPolicyBuilder.WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+                sourcePolicy = retryPolicyBuilder.WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (outcome, retryAttempt, timespan) =>
+                {
+                    logger.LogWarning($"Retry {retryAttempt} to {(outcome.Result?.RequestMessage?.RequestUri?.ToString())??"Unknown destination"} due to {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+                    
+                });
             }
             else
             {
