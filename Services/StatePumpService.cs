@@ -103,13 +103,18 @@ namespace SimpleAlgorandStream.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Delay(5000);
+            _logger.LogInformation("Pump starting.");
+            _logger.LogInformation($"Waiting for startup delay of {_algodSourceMonitor.CurrentValue.StartupDelay}");
+            await Task.Delay(_algodSourceMonitor.CurrentValue.StartupDelay);
+            _logger.LogInformation($"Finished waiting.");
 
+            _logger.LogInformation($"Getting current round.");
             ulong currentRound = 0;
             try
             {
                 var status = await _algorand.GetStatusAsync();
                 currentRound = status!.LastRound;
+                _logger.LogInformation($"Got round as {currentRound}.");
             }
             catch (Exception ex)
             {
@@ -137,6 +142,7 @@ namespace SimpleAlgorandStream.Services
                 }
                 
             }
+            _logger.LogInformation("Pump ending.");
         }
 
         private async Task pumpToTargets(CertifiedBlock block, Model.LedgerStateDelta delta)

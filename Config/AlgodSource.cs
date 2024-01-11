@@ -6,6 +6,7 @@
         public string ApiToken { get; set; }
         public bool ExponentialBackoff { get; set; }
         public TimeSpan RetryFrequency { get; set; }
+        public TimeSpan StartupDelay { get; set; }
 
     }
 }
