@@ -103,6 +103,8 @@ namespace SimpleAlgorandStream.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Delay(5000);
+
             ulong currentRound = 0;
             try
             {

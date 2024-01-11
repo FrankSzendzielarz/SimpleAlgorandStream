@@ -61,18 +61,33 @@ namespace SimpleAlgorandStream
                     {
                         var pushTargetConfig = hostContext.Configuration.GetSection("PushTargets").Get<PushTargets>() ?? throw new Exception("Cannot start service without PushTarget configuration");
                         options.ListenAnyIP(pushTargetConfig.SignalR.Port);
+                        
                     });
+                    services.AddCors(options =>
+                    {
+                        options.AddPolicy("AllowAllOrigins",
+                            builder =>
+                            {
+                                builder
+                                .AllowAnyOrigin()
+                                .AllowAnyMethod()
+                                .AllowAnyHeader();
+                            });
+                    });
+
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.Configure(app =>
                     {
                         app.UseRouting();
+                        app.UseCors("AllowAllOrigins");
                         app.UseEndpoints(endpoints =>
                         {
                             var pushTargetConfig = app.ApplicationServices.GetRequiredService<IConfiguration>().GetSection("PushTargets").Get<PushTargets>() ?? throw new Exception("Cannot start service without PushTarget configuration");
                             endpoints.MapHub<AlgorandHub>($"/{pushTargetConfig.SignalR.HubName}");
                         });
+                
                     });
                 });
             
