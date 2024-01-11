@@ -5,6 +5,8 @@ using Microsoft.Extensions.Options;
 using Polly.Extensions.Http;
 using Polly;
 using SimpleAlgorandStream.Config;
+using Algorand.Algod.Model;
+using Algorand;
 
 namespace SimpleAlgorandStream.Services
 {
@@ -15,20 +17,34 @@ namespace SimpleAlgorandStream.Services
         private DefaultApi _algorand;
         private IHttpClientFactory _clientFactory;
         private readonly ILogger<StatePumpService> _logger;
+        private readonly IHostApplicationLifetime _appLifetime;
         
 
 
-        public StatePumpService(IOptionsMonitor<AlgodSource> optionsMonitor, IHttpClientFactory clientFactory, ILogger<StatePumpService> logger)
+        public StatePumpService(IOptionsMonitor<AlgodSource> optionsMonitor, 
+                                IHttpClientFactory clientFactory, 
+                                ILogger<StatePumpService> logger,
+                                IHostApplicationLifetime appLifetime)
         {
-            _optionsMonitor = optionsMonitor;
-            _optionsMonitor.OnChange(_ =>
+            try
             {
+                _appLifetime = appLifetime;
+                _optionsMonitor = optionsMonitor;
+                _optionsMonitor.OnChange(_ =>
+                {
+                    setupClient();
+                });
+                _logger = logger;
+                _clientFactory = clientFactory;
+                
+
                 setupClient();
-            });
-            _logger = logger;
-            _clientFactory = clientFactory;
-            
-            setupClient();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Cannot start pump service. Exiting.");
+                _appLifetime.StopApplication();
+            }
 
         }
 
@@ -67,11 +83,42 @@ namespace SimpleAlgorandStream.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            ulong currentRound = 0;
+            try
+            {
+                var status = await _algorand.GetStatusAsync();
+                currentRound = status!.LastRound;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Cannot get node status. Exiting.");
+                _appLifetime.StopApplication();
+
+            }
+
+            //test code:
+            currentRound -= 10;
+            //end test code
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                var result=await _algorand.GetStatusAsync();
-                Thread.Sleep(5000);
-                
+
+                var block=await _algorand.GetBlockAsync(currentRound);
+                try
+                {
+                    var delta = await _algorand.GetLedgerStateDeltaAsync(currentRound);
+                }
+                catch (ApiException<ErrorResponse> ex)
+                {
+                    
+                }
+                catch (Exception ex2)
+                {
+
+                }
+
+                currentRound++;
+                Thread.Sleep(1000);
             }
         }
     }
