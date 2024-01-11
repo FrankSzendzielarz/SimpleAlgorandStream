@@ -2,7 +2,7 @@
   "profiles": {
     "SimpleAlgorandStream": {
       "commandName": "Project",
-      "commandLineArgs": "--AlgodSource:ExponentialBackoff=true"
+      "commandLineArgs": "--AlgodSource:ExponentialBackoff=false"
     }
   }
 }

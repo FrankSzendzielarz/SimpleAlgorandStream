@@ -44,6 +44,7 @@ namespace SimpleAlgorandStream
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.Configure<AlgodSource>(hostContext.Configuration.GetSection("AlgodSource"));
+                    services.Configure<PushTargets>(hostContext.Configuration.GetSection("PushTargets"));
                     services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
                             .AddPolicyHandler((serviceProvider,x) =>
@@ -76,7 +77,11 @@ namespace SimpleAlgorandStream
             }
             else
             {
-                sourcePolicy = retryPolicyBuilder.WaitAndRetryForeverAsync(retryAttempt => algodSourceConfig.RetryFrequency);
+                sourcePolicy = retryPolicyBuilder.WaitAndRetryForeverAsync(retryAttempt => algodSourceConfig.RetryFrequency, (outcome, retryAttempt, timespan) =>
+                {
+                    logger.LogWarning($"Retry {retryAttempt} to {(outcome.Result?.RequestMessage?.RequestUri?.ToString()) ?? "Unknown destination"} due to {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+
+                });
             }
             return sourcePolicy;
 

@@ -1,13 +1,6 @@
 ﻿using Algorand;
 using Algorand.Algod.Model;
 using Algorand.Algod.Model.Transactions;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SimpleAlgorandStream.Model
 {
@@ -17,13 +10,13 @@ namespace SimpleAlgorandStream.Model
     // TEAL program
     public partial class TealValue
     {
-        
+
         [Newtonsoft.Json.JsonProperty("tt", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong Type { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("tb", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Bytes { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("ui", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong Uint { get; set; }
     }
@@ -32,8 +25,8 @@ namespace SimpleAlgorandStream.Model
     // LocalState or GlobalState
     //
     //msgp:allocbound TealKeyValue EncodedMaxKeyValueEntries
-    public partial class TealKeyValue : Dictionary<string,TealValue>
-    { 
+    public partial class TealKeyValue : Dictionary<string, TealValue>
+    {
     }
 
     // StateSchemas is a thin wrapper around the LocalStateSchema and the
@@ -42,7 +35,7 @@ namespace SimpleAlgorandStream.Model
     {
         [Newtonsoft.Json.JsonProperty("lsch", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public StateSchema LocalStateSchema { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("gsch", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public StateSchema GlobalStateSchema { get; set; }
     }
@@ -50,17 +43,17 @@ namespace SimpleAlgorandStream.Model
     // AppParams stores the global information associated with an application
     public partial class AppParams
     {
-        
+
         [Newtonsoft.Json.JsonProperty("approv", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] ApprovalProgram { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("clearp", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] ClearStateProgram { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("gs", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public TealKeyValue GlobalState { get; set; }
         public StateSchemas StateSchemas { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("epp", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public uint ExtraProgramPages { get; set; }
     }
@@ -71,10 +64,10 @@ namespace SimpleAlgorandStream.Model
     // AppParams and 2. even if the application has been deleted
     public partial class AppLocalState
     {
-        
+
         [Newtonsoft.Json.JsonProperty("hsch", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public StateSchema Schema { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("tkv", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public TealKeyValue KeyValue { get; set; }
     }
@@ -105,10 +98,10 @@ namespace SimpleAlgorandStream.Model
     // AssetHolding describes an asset held by an account.
     public partial class AssetHolding
     {
-        
+
         [Newtonsoft.Json.JsonProperty("a", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong Amount { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("f", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Frozen { get; set; }
     }
@@ -150,11 +143,11 @@ namespace SimpleAlgorandStream.Model
         public ulong App { get; set; }
     }
 
-  
 
- 
 
-   
+
+
+
 
     // AccountData provides users of the Balances interface per-account data (like basics.AccountData)
     // but without any Dictionarys containing AppParams, AppLocalState, AssetHolding, or AssetParams. This
@@ -181,7 +174,7 @@ namespace SimpleAlgorandStream.Model
         public ulong VoteFirstValid { get; set; }
         public ulong VoteLastValid { get; set; }
         public ulong VoteKeyDilution { get; set; }
-    
+
     }
 
     // BalanceRecord is similar to basics.BalanceRecord but with decoupled base and voting data
@@ -203,7 +196,7 @@ namespace SimpleAlgorandStream.Model
         public BalanceRecord[] Accts { get; set; } // cache for addr to deltas index resolution
         public Dictionary<Address, nint> acctsCache { get; set; } // AppResources deltas. If app params or local state is deleted, there is a nil value in AppResources.Params or AppResources.State and Deleted flag set
         public AppResourceRecord[] AppResources { get; set; } // caches for {addr, app id} to app params delta resolution
-                                                      // not preallocated - use UpsertAppResource instead of inserting directly
+                                                              // not preallocated - use UpsertAppResource instead of inserting directly
         public Dictionary<AccountApp, nint> appResourcesCache { get; set; }
         public AssetResourceRecord[] AssetResources { get; set; } // not preallocated - use UpsertAssertResource instead of inserting directly
         public Dictionary<AccountAsset, nint> assetResourcesCache { get; set; }
@@ -225,7 +218,7 @@ namespace SimpleAlgorandStream.Model
         public ulong Intra { get; set; } // the index of the transaction in the block
     }
 
-  
+
 
     // A Txlease is a transaction (sender, lease) pair which uniquely specifies a
     // transaction lease.
@@ -238,7 +231,7 @@ namespace SimpleAlgorandStream.Model
     // CreatableIndex represents either an AssetIndex or AppIndex, which come from
     // the same namespace of indices as each other (both assets and apps are
     // "creatables")
-    
+
 
 
 
@@ -248,7 +241,7 @@ namespace SimpleAlgorandStream.Model
         public ulong Ctype { get; set; } // Created if true, deleted if false
         public bool Created { get; set; } // creator of the app/asset
         public Address Creator { get; set; } // Keeps track of how many times this app/asset appears in
-                                // accountUpdates.creatableDeltas
+                                             // accountUpdates.creatableDeltas
         public nint Ndeltas { get; set; }
     }
 
@@ -256,10 +249,10 @@ namespace SimpleAlgorandStream.Model
     // of accounts (split up by their Status value).
     public partial class AlgoCount
     {
-        
+
         [Newtonsoft.Json.JsonProperty("mon", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong Money { get; set; } // Total number of whole reward units in accounts.
-        
+
         [Newtonsoft.Json.JsonProperty("rwd", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong RewardUnits { get; set; }
     }
@@ -268,16 +261,16 @@ namespace SimpleAlgorandStream.Model
     // grouped by different account status values.
     public partial class AccountTotals
     {
-        
+
         [Newtonsoft.Json.JsonProperty("online", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AlgoCount Online { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("offline", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AlgoCount Offline { get; set; }
-        
+
         [Newtonsoft.Json.JsonProperty("notpart", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AlgoCount NotParticipating { get; set; } // Total number of algos received per reward unit since genesis
-        
+
         [Newtonsoft.Json.JsonProperty("rwdlvl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ulong RewardsLevel { get; set; }
     }
@@ -289,16 +282,16 @@ namespace SimpleAlgorandStream.Model
     public partial class LedgerStateDelta
     {
         public AccountDeltas Accts { get; set; } // modified kv pairs (nil == delete)
-                                    // not preallocated use .AddKvMod to insert instead of direct assignment
+                                                 // not preallocated use .AddKvMod to insert instead of direct assignment
         public Dictionary<string, KvValueDelta> KvMods { get; set; } // new Txids for the txtail and TxnCounter, Dictionaryped to txn.LastValid
         public Dictionary<byte[], IncludedTransactions> Txids { get; set; } // new txleases for the txtail Dictionaryped to expiration
-                                                             // not pre-allocated so use .AddTxLease to insert instead of direct assignment
+                                                                            // not pre-allocated so use .AddTxLease to insert instead of direct assignment
         public Dictionary<Txlease, ulong> Txleases { get; set; } // new creatables creator lookup table
-                                                    // not pre-allocated so use .AddCreatable to insert instead of direct assignment
+                                                                 // not pre-allocated so use .AddCreatable to insert instead of direct assignment
         public Dictionary<ulong, ModifiedCreatable> Creatables { get; set; } // new block header { get; set; } read-only
         public Block Hdr { get; set; } // StateProofNext represents modification on StateProofNextRound field in the block header. If the block contains
-                                     // a valid state proof transaction, this field will contain the next round for state proof.
-                                     // otherwise it will be set to 0.
+                                       // a valid state proof transaction, this field will contain the next round for state proof.
+                                       // otherwise it will be set to 0.
         public ulong StateProofNext { get; set; } // previous block timestamp
         public long PrevTimestamp { get; set; } // initial hint for allocating data structures for StateDelta
         public nint initialHint { get; set; } // The account totals reflecting the changes in this StateDelta object.
