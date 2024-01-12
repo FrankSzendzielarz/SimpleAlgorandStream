@@ -5,6 +5,7 @@
 
 This is an initial release with minimal testing and comes with no guarantees. It is intended at this point in time to garner feature request feedback and identify bugs.
 
+
 ## What is it?
 
 This is a .NET Core executable that can run alongside your Algorand node to monitor for changes you are interested in. It pushes those changes, blocks and state deltas, as well formed JSON messages to different types of push target client.
@@ -80,6 +81,8 @@ The filter expression
 ## Deployment
 
 For now, the component is built as self-contained platform specific binaries. If you have .NET 7 runtime installed, you can build this solution to a ``portable`` binary, or submit a feature request to have these produced automatically too.
+
+Binaries are available here [Binaries.](https://github.com/FrankSzendzielarz/SimpleAlgorandStream/releases)
 
 ## Configuration and Logging
 ```json
