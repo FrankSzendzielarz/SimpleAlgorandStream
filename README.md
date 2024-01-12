@@ -18,7 +18,7 @@ if your game or dApp connects to a node and allows a player to make in app purch
 to that specific address. Your game or dApp can then make updates in real time, without having to query a data store or maintain an Indexer component.
 
 With the message queue target, you can also use this component to reliably push messages to a queue, and then have a worker process consume those messages and update a database 
-for post-hoc and ad-hoc queries later on. Your datastore would be much smaller as it would only contain the data you are interested in.
+for post-hoc and ad-hoc queries later on. Your datastore would be compact as it would only contain the data you are interested in.
 
 ## How does it work?
 
