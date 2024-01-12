@@ -85,6 +85,9 @@ For now, the component is built as self-contained platform specific binaries. If
 Binaries are available here [Binaries.](https://github.com/FrankSzendzielarz/SimpleAlgorandStream/releases)
 
 ## Configuration and Logging
+
+NB: The AlgodSource section can be updated in realtime.
+
 ```json
 {
   //Algorand node source configuration section.
