@@ -55,17 +55,24 @@ namespace SimpleAlgorandStream.SignalR
             // When broadcasting a message, only send it to clients whose filters match the message
             foreach (var connection in _filters)
             {
-                var pathExpression = connection.Value;
-                if (pathExpression!=null)
+                try
                 {
-                    var token = JToken.Parse(message);
-                    var result = pathExpression.Transform(token);
-                    if (result.Token.ToString().ToLower()!="true")
+                    var pathExpression = connection.Value;
+                    if (pathExpression != null)
                     {
-                        continue;
+
+                        var token = JToken.Parse(message);
+                        var result = pathExpression.Transform(token);
+                        if (result.Token.ToString().ToLower() != "true")
+                        {
+                            continue;
+                        }
                     }
+                    await hub.Clients.Client(connection.Key).SendAsync("ReceiveAlgorandState", message);
                 }
-                await hub.Clients.Client(connection.Key).SendAsync("ReceiveAlgorandState", message);
+                catch
+                {
+                }
 
             }
         }
