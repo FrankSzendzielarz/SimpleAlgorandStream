@@ -43,6 +43,9 @@ For example, your dApp single page app could be connected to a node, implementin
 connected dApp pages will be updated in real time with the new state. Clients can discard messages they are not interested in. This means dApps can operate without the need
 for an Indexer or large database that has to be queried.
 
+Note that for client apps, the SignalR hub would stream all state changes on the network to potentially thousands of clients. For this reason
+we introduce the filter callback. TODO
+
 #### RabbitMQ
 
 This is AMQP 0.9.1, a messaging protocol. 
@@ -53,4 +56,7 @@ This means that message delivery is 'reliable' and 'durable'. If a client is not
 With this model, the client is expected to be a server, and responsible for filtering messages it does not need.
 
 
+## Deployment
 
+
+## Configuration 
