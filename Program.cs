@@ -47,7 +47,10 @@ namespace SimpleAlgorandStream
                 {
                     services.Configure<AlgodSource>(hostContext.Configuration.GetSection("AlgodSource"));
                     services.Configure<PushTargets>(hostContext.Configuration.GetSection("PushTargets"));
-                    services.AddSignalR();
+                    services.AddSignalR(options =>
+                    {
+                        options.MaximumReceiveMessageSize = 6 * 1024 * 1024; // 6 MB
+                    });
                     services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
                             .AddPolicyHandler((serviceProvider,x) =>
