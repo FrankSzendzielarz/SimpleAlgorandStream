@@ -12,6 +12,9 @@ This is a .NET Core executable that can run alongside your Algorand node to moni
 
 It supports front end clients and server-to-server communication, and allows for reliable messaging using message queues.
 
+Mobile and web front-ends can easily subscribe to filtered Algorand events using WebSockets, Server Sent Events, or Long Polling.
+Servers can subscribe to Algorand events using AMQP 0.9.1 and/or RabbitMQ.
+
 ## What is it for?
 
 It supports a push model, where instead of *necessarily* using Indexer or a database, your dApp or app can receive messages about only those changes you are interested in. For example, 
