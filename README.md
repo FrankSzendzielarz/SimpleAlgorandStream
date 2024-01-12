@@ -29,6 +29,20 @@ As the stream of information is received, it pushes them to two types of configu
 -RabbitMQ 
 -SignalR 
 
+#### RabbitMQ
+
+This is AMQP 0.9.1, a messaging protocol. 
+
+Here an 'exchange' is implemented. Block and State Delta messages are pushed to the exchange. Clients can connect to the exchange and bind a 'queue'.
+This means that message delivery is **reliable** and **durable**. If a client is not operational, the message will be queued until the client connects and consumes the message.
+
+With this model, the client is expected to be a server, and responsible for filtering messages it does not need.
+
+This can be a useful addition to various solution architectures. For example, you could have a local reactive stream that pre-filters messages, discarding the majority
+of MQ block transactions you don't need, or transform the messages into a different format, before, say, pushing the data to your own web or mobile clients or
+to cloud stream analytics services or databases.
+
+
 #### SignalR
 
 This technology provides a ``hub``, to which clients can connect and receive messages using a client library. The client library is available for many platforms, including JavaScript, .NET, Java, Python, etc.
@@ -43,20 +57,95 @@ For example, your dApp single page app could be connected to a node, implementin
 connected dApp pages will be updated in real time with the new state. Clients can discard messages they are not interested in. This means dApps can operate without the need
 for an Indexer or large database that has to be queried.
 
-Note that for client apps, the SignalR hub would stream all state changes on the network to potentially thousands of clients. For this reason
-we introduce the filter callback. TODO
+Note that for client apps, the SignalR hub would stream all state changes on the network to potentially thousands of clients. This would cause high costs for data egress.
+For this reason we introduce a facility for clients to set their own message filters using **JMESPath** JSON query language.
 
-#### RabbitMQ
+For example, this code from the sample client in Javascript shows how to filter for blocks with transactions coming from a specific sender:
 
-This is AMQP 0.9.1, a messaging protocol. 
+```javascript
+var filter = "Block.block.txns[*].txn.snd | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
+connection.invoke("SetFilter", filter).then(function (result) {
+    if (result) {
+        console.log("Filter applied.");
+    } else {
+        console.log("Filter application failed.");
+    }
+}).catch(function (err) {
+    return console.error(err.toString());
+});
+```
 
-Here an 'exchange' is implemented. Block and State Delta messages are pushed to the exchange. Clients can connect to the exchange and bind a 'queue'.
-This means that message delivery is 'reliable' and 'durable'. If a client is not operational, the message will be queued until the client connects and consumes the message.
-
-With this model, the client is expected to be a server, and responsible for filtering messages it does not need.
-
+The filter expression 
 
 ## Deployment
 
+For now, the component is built as self-contained platform specific binaries. If you have .NET 7 runtime installed, you can build this solution to a ``portable`` binary, or submit a feature request to have these produced automatically too.
 
-## Configuration 
+## Configuration and Logging
+```json
+{
+  //Algorand node source configuration section.
+
+  "AlgodSource": {
+    "ApiUri": "http://localhost:4001/",
+    "ApiToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "ExponentialBackoff": false,  // If true, will retry with increasing delay if the node is not available.
+    "RetryFrequency": "00:00:05", // Retry frequency for lost connection when backoff is disabled.
+    "StartupDelay": "00:00:05"    // A startup delay after component start up before messages are acquired and pumped to allow for development clients to launch without missing initial messages.
+  },
+
+  // Confiuration section for currently supported push targets
+
+  "PushTargets": {
+    
+    //SignalR hub configuration. See the HTML client demonstration for usage.
+    "SignalR": {
+      "HubName": "AlgorandFeedHub",
+      "Port": 5000,
+      "Enabled": true  // Set to false to disable this target.
+    },
+
+    //RabbitMQ server exchange configuration
+    "RabbitMQ": {
+      "HostName": "localhost",
+      "Port": 5672,
+      "ExchangeName": "AlgorandFeed",
+      "Enabled":  true // Set to false to disable this target.
+    }
+  },
+
+  // Microsoft.Extension.Logging configuration section. See https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-7.0
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    },
+    "Console": {
+      "LogLevel": {
+        "Default": "Information"
+      }
+    },
+    "Debug": {
+      "LogLevel": {
+        "Default": "None"
+      }
+    },
+    "EventSource": {
+      "LogLevel": {
+        "Default": "None"
+      }
+    },
+    "ApplicationInsights": {
+      "LogLevel": {
+        "Default": "None"
+      }
+    }
+
+  }
+
+}
+```
+
+
+
