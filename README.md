@@ -76,7 +76,7 @@ connection.invoke("SetFilter", filter).then(function (result) {
 });
 ```
 
-The filter expression 
+
 
 ## Deployment
 
