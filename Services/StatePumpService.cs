@@ -200,7 +200,7 @@ namespace SimpleAlgorandStream.Services
                 if (_pushTargetsMonitor.CurrentValue.SignalR.Enabled)
                 {
                     _logger.LogInformation($"Publishing message to SignalR hub.");
-                    await _signalRHub.Clients.All.SendAsync("ReceiveAlgorandState", json);
+                    await AlgorandHub.BroadcastMessage(_signalRHub, json);
                 }
             }
             catch (Exception ex)
