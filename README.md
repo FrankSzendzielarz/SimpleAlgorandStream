@@ -14,7 +14,7 @@ It supports front end clients and server-to-server communication, and allows for
 
 ## What is it for?
 
-It supports a push model, where instead of using Indexer or a database, your dApp or app can receive messages about only those changes you are interested in. For example, 
+It supports a push model, where instead of *necessarily* using Indexer or a database, your dApp or app can receive messages about only those changes you are interested in. For example, 
 if your game or dApp connects to a node and allows a player to make in app purchases by payments to an address, you can filter for transactions
 to that specific address. Your game or dApp can then make updates in real time, without having to query a data store or maintain an Indexer component.
 
