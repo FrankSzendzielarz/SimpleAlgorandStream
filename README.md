@@ -5,6 +5,9 @@
 
 This is an initial release with minimal testing and comes with no guarantees. It is intended at this point in time to garner feature request feedback and identify bugs.
 
+If you think this could be useful, or evolve into something useful, please add your feature requests and ideas to the github repo.
+For example, one immediate feature could be to allow JavaScript clients to filter not just messages but the message contents themselves using JSON transforms, to cut back on network traffic.
+
 
 ## What is it?
 
