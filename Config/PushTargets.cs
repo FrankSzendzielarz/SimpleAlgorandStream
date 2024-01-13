@@ -10,6 +10,7 @@ namespace SimpleAlgorandStream.Config
     {
         public SignalR SignalR { get; set; }
         public RabbitMQ RabbitMQ { get; set; }
+        public bool UseFriendlyNames { get; set; }
     }
 
     internal class SignalR

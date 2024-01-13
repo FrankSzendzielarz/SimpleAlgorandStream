@@ -216,6 +216,7 @@ namespace SimpleAlgorandStream.Services
 
         private async Task pumpToTargets(CertifiedBlock block, Model.LedgerStateDelta delta)
         {
+            bool useFriendlyName = _pushTargetsMonitor.CurrentValue.UseFriendlyNames;
             byte[] body= new byte[] { };
             string json = "";
             try 
@@ -227,7 +228,7 @@ namespace SimpleAlgorandStream.Services
                 };
                 var settings = new JsonSerializerSettings
                 {
-                    ContractResolver = new IgnoreShouldSerializeContractResolver(),
+                    ContractResolver = new IgnoreShouldSerializeContractResolver(useFriendlyName),
                     NullValueHandling = NullValueHandling.Ignore
                 };
                 json = JsonConvert.SerializeObject(message, settings);
