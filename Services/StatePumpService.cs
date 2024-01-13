@@ -10,11 +10,37 @@ using SimpleAlgorandStream.Model;
 using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using SimpleAlgorandStream.SignalR;
+using Algorand;
 
 namespace SimpleAlgorandStream.Services
 {
+
+
+    public class LoggingHandler : DelegatingHandler
+    {
+        internal static string lastResponse = "";
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            // Log the response details so that we can obtain the JSON
+            if (response.Content != null)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                lastResponse = responseContent;
+
+                // Replace the original content with a copy
+                response.Content = new StringContent(responseContent);
+            }
+
+            return response;
+        }
+    }
+
     internal class StatePumpService : BackgroundService
     {
+        
         private readonly IOptionsMonitor<AlgodSource> _algodSourceMonitor;
         private readonly IOptionsMonitor<PushTargets> _pushTargetsMonitor;
         private HttpClient _client;
@@ -27,6 +53,7 @@ namespace SimpleAlgorandStream.Services
         private readonly IHubContext<AlgorandHub> _signalRHub;
 
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
 
         public StatePumpService(IOptionsMonitor<AlgodSource> algodSource,
                                 IOptionsMonitor<PushTargets> pushTargets,
@@ -122,6 +149,7 @@ namespace SimpleAlgorandStream.Services
                 _appLifetime.StopApplication();
 
             }
+            currentRound = currentRound - 800 ;
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -129,12 +157,45 @@ namespace SimpleAlgorandStream.Services
                 try
                 {
                     _logger.LogInformation($"Pumping round {currentRound}");
-                    var block = await _algorand.GetBlockAsync(currentRound);
-                    var delta = await _algorand.GetLedgerStateDeltaAsync(currentRound, Format.Json);
+                    CertifiedBlock? block = null;
+                    Model.LedgerStateDelta? delta = null;
+                    try
+                    {
+                        block = await _algorand.GetBlockAsync(currentRound);
+                    }
+                    catch (ApiException<ErrorResponse> ex)
+                    {
+                        _logger.LogWarning(ex, $"Block not available for round {currentRound}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Block failed for round {currentRound}");
+                    }
+                    try
+                    {
+                        delta = await _algorand.GetLedgerStateDeltaAsync(currentRound, Format.Json);
+                    }
+                    catch (ApiException<ErrorResponse> ex)
+                    {
+                        _logger.LogWarning(ex, $"Delta not available for round {currentRound}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Delta failed for round {currentRound}");
+                    }
 
                     await pumpToTargets(block, delta);
 
                     currentRound++;
+                    _logger.LogInformation($"Waiting for round {currentRound}");
+                    ulong nodeRound = 0;
+                    do
+                    {
+                        var status = await _algorand.WaitForBlockAsync(currentRound);
+                        nodeRound=status.LastRound;
+                    }
+                    while(nodeRound < currentRound);
+
                 }
                 finally
                 {

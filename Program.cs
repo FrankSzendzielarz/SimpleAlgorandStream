@@ -51,8 +51,10 @@ namespace SimpleAlgorandStream
                     {
                         options.MaximumReceiveMessageSize = 6 * 1024 * 1024; // 6 MB
                     });
+                    services.AddTransient<LoggingHandler>();
                     services.AddHostedService<StatePumpService>();
                     services.AddHttpClient<StatePumpService>()
+                            .AddHttpMessageHandler<LoggingHandler>()
                             .AddPolicyHandler((serviceProvider,x) =>
                             {
                                 ILogger<StatePumpService> logger = serviceProvider.GetRequiredService<ILogger<StatePumpService>>();
@@ -101,7 +103,8 @@ namespace SimpleAlgorandStream
             IAsyncPolicy<HttpResponseMessage> sourcePolicy = null;
             var retryPolicyBuilder = HttpPolicyExtensions
                 .HandleTransientHttpError()
-                .OrResult(msg => !msg.IsSuccessStatusCode);
+                .OrResult(msg => !msg.IsSuccessStatusCode && msg.StatusCode!=System.Net.HttpStatusCode.NotFound);
+                
               
             if (algodSourceConfig!.ExponentialBackoff)
             {

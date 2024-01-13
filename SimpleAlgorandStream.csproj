@@ -9,7 +9,7 @@
 
 	
   <ItemGroup>
-    <PackageReference Include="Algorand2" Version="2.0.0.2023082310" />
+    <PackageReference Include="Algorand2" Version="2.0.0.2024011309" />
     <PackageReference Include="JmesPath.Net" Version="1.0.330" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
