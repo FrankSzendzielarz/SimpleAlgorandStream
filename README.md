@@ -97,6 +97,8 @@ connection.invoke("SetFilter", filter).then(function (result) {
 
 For now, the component is built as self-contained platform specific binaries. If you have .NET 7 runtime installed, you can build this solution to a ``portable`` binary, or submit a feature request to have these produced automatically too.
 
+Binaries are for Windows, OSX and Linux - architectures ARM64 and x64.
+
 Binaries are available here [Binaries.](https://github.com/FrankSzendzielarz/SimpleAlgorandStream/releases)
 
 ## Configuration and Logging
