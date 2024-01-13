@@ -73,6 +73,8 @@ For example, your dApp single page app could be connected to a node, implementin
 connected dApp pages will be updated in real time with the new state. Clients can discard messages they are not interested in. This means dApps can operate without the need
 for an Indexer or large database that has to be queried.
 
+#### Filtering
+
 Note that for client apps, the SignalR hub would stream all state changes on the network to potentially thousands of clients. This would cause high costs for data egress.
 For this reason we introduce a facility for clients to set their own message filters using **JMESPath** JSON query language.
 
@@ -91,6 +93,7 @@ connection.invoke("SetFilter", filter).then(function (result) {
 });
 ```
 
+Server apps using queues are expected to filter messages themselves.
 
 
 ## Deployment
