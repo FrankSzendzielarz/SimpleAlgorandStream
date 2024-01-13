@@ -78,7 +78,12 @@ namespace SimpleAlgorandStream.Services
                 var factory = new ConnectionFactory() { HostName = _pushTargetsMonitor.CurrentValue.RabbitMQ.HostName };
                 _rabbitMQConnection = factory.CreateConnection();
                 setupClient().Wait();
-                
+
+
+
+     
+     
+
             }
             catch (Exception ex)
             {
@@ -149,7 +154,7 @@ namespace SimpleAlgorandStream.Services
                 _appLifetime.StopApplication();
 
             }
-            currentRound = currentRound - 800 ;
+            
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -170,6 +175,8 @@ namespace SimpleAlgorandStream.Services
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, $"Block failed for round {currentRound}");
+                        _logger.LogError($"Last http response: {LoggingHandler.lastResponse}" );
+
                     }
                     try
                     {
@@ -182,6 +189,7 @@ namespace SimpleAlgorandStream.Services
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, $"Delta failed for round {currentRound}");
+                        _logger.LogError($"Last http response: {LoggingHandler.lastResponse}");
                     }
 
                     await pumpToTargets(block, delta);

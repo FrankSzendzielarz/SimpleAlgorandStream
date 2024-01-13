@@ -284,7 +284,7 @@ namespace SimpleAlgorandStream.Model
         public AccountDeltas Accts { get; set; } // modified kv pairs (nil == delete)
                                                  // not preallocated use .AddKvMod to insert instead of direct assignment
         public Dictionary<string, KvValueDelta> KvMods { get; set; } // new Txids for the txtail and TxnCounter, Dictionaryped to txn.LastValid
-        public Dictionary<byte[], IncludedTransactions> Txids { get; set; } // new txleases for the txtail Dictionaryped to expiration
+        public Dictionary<string, IncludedTransactions> Txids { get; set; } // new txleases for the txtail Dictionaryped to expiration
                                                                             // not pre-allocated so use .AddTxLease to insert instead of direct assignment
         public Dictionary<Txlease, ulong> Txleases { get; set; } // new creatables creator lookup table
                                                                  // not pre-allocated so use .AddCreatable to insert instead of direct assignment
