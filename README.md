@@ -75,7 +75,7 @@ for an Indexer or large database that has to be queried.
 
 #### Filtering
 
-Note that for client apps, the SignalR hub would stream all state changes on the network to potentially thousands of clients. This would cause high costs for data egress.
+Unfiltered the SignalR hub would stream all state changes on the network to potentially thousands of clients. This would cause high costs for data egress.
 For this reason we introduce a facility for clients to set their own message filters using **JMESPath** JSON query language.
 
 For example, this code from the sample client in Javascript shows how to filter for blocks with transactions coming from a specific sender:
