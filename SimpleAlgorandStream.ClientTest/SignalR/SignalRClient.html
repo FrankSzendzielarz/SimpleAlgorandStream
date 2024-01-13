@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+</head>
+<body>
+    <div id="messages"></div>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5000/AlgorandFeedHub", {withCredentials:false})            
+            .withAutomaticReconnect({
+                nextRetryDelayInMilliseconds: retryContext => {
+                    // If the connection has never been established, retry every 2 seconds.
+                    if (retryContext.elapsedMilliseconds < 2000) {
+                        return 2000;
+                    }
+
+                    // If the connection was previously established, retry every 2 seconds.
+                    return 2000;
+                }
+            })
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        connection.onreconnecting((error) => {
+            console.assert(connection.state === signalR.HubConnectionState.Reconnecting);
+            console.log(`Connection lost due to error "${error}". Reconnecting.`);
+        });
+
+        connection.onreconnected((connectionId) => {
+            console.assert(connection.state === signalR.HubConnectionState.Connected);
+            //var filter = "Block.block.txns[*].txn.snd | [?@] | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
+            //connection.invoke("SetFilter", filter).then(function (result) {
+            //    if (result) {
+            //        console.log("Filter applied.");
+            //    } else {
+            //        console.log("Filter application failed.");
+            //    }
+            //}).catch(function (err) {
+            //    return console.error(err.toString());
+            //});
+            console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
+        });
+
+        connection.on("receivealgorandstate", (message) => {
+            const msg = document.createElement("div");
+            msg.textContent = message;
+            document.getElementById("messages").appendChild(msg);
+        });
+
+        async function start() {
+            try {
+                await connection.start().then(function () {
+                    return;
+                    var filter = "Block.block.txns[*].txn.snd | [?@] | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
+                    connection.invoke("SetFilter", filter).then(function (result) {
+                        if (result) {
+                            console.log("Filter applied.");
+                        } else {
+                            console.log("Filter application failed.");
+                        }
+                    }).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                });
+                console.log("connected");
+            } catch (err) {
+                console.log(err);
+                setTimeout(() => start(), 2000);
+            }
+        };
+
+        start();
+    </script>
+</body>
+</html>

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleAlgorandStream", ".\SimpleAlgorandStream\SimpleAlgorandStream.csproj", "{2BFF7F78-305E-4392-9597-CD74D1C96616}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleAlgorandStream", "SimpleAlgorandStream.csproj", "{2BFF7F78-305E-4392-9597-CD74D1C96616}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleAlgorandStream.ClientTest", ".\SimpleAlgorandStream.ClientTest\SimpleAlgorandStream.ClientTest.csproj", "{432CA499-A10C-4109-A66A-77A51CA6C95A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAlgorandStream.ClientTest", "..\SimpleAlgorandStream.ClientTest\SimpleAlgorandStream.ClientTest.csproj", "{432CA499-A10C-4109-A66A-77A51CA6C95A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
