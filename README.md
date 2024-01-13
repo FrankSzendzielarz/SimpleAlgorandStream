@@ -42,8 +42,8 @@ for post-hoc and ad-hoc queries later on. Your datastore would be compact as it 
 
 The component connects to an Algorand node and long polls the Algod API for ``blocks`` and ``deltas``, round by round.
 As the stream of information is received, it pushes them to two types of configured push targets:
--RabbitMQ 
--SignalR 
+- RabbitMQ 
+- SignalR 
 
 #### RabbitMQ
 
