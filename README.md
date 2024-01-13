@@ -8,6 +8,7 @@ This is an initial release with minimal testing and comes with no guarantees. It
 If you think this could be useful, or evolve into something useful, please add your feature requests and ideas to the github repo.
 For example, one immediate feature could be to allow JavaScript clients to filter not just messages but the message contents themselves using JSON transforms, to cut back on network traffic.
 
+So far this has been tested on a limited set of data. Logger will output any block or state delta JSON that failed to serialise/deserialise. Please log an issue if you find an incompatible model.
 
 ## What is it?
 
@@ -17,6 +18,14 @@ It supports front end clients and server-to-server communication, and allows for
 
 Mobile and web front-ends can easily subscribe to filtered Algorand events using WebSockets, Server Sent Events, or Long Polling.
 Servers can subscribe to Algorand events using AMQP 0.9.1 and/or RabbitMQ.
+
+If you want State Deltas, your node should be configured to maintain them. Otherwise only blocks and transactions are produced. 
+The State Deltas are produced with the following additional config settings in the node config.json:
+
+```json
+    "EnableDeveloperAPI": true, 
+    "EnableTxnEvalTracer": true,
+```
 
 ## What is it for?
 
