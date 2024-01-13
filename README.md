@@ -109,7 +109,9 @@ NB: The AlgodSource section can be updated in realtime.
   // Confiuration section for currently supported push targets
 
   "PushTargets": {
-    
+    //Do not use the algorand internal field names and instead use friendly names, eg: GenesisHash instead of gh.
+     "UseFriendlyNames": false,
+
     //SignalR hub configuration. See the HTML client demonstration for usage.
     "SignalR": {
       "HubName": "AlgorandFeedHub",
