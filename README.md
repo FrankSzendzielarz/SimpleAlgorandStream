@@ -1,6 +1,12 @@
 # SimpleAlgorandStream
 *A component that monitors an Algorand node for transactions and state changes and sends them as messages to multiple push targets.*
 
+## Quick guide
+- See the release binaries here and install somewhere with connectivity to your node  [Binaries.](https://github.com/FrankSzendzielarz/SimpleAlgorandStream/releases)
+- Disable RabbitMQ in the appsettings.json OR use the RabbitMQ [quickstart here] (https://rabbitmq.com/download.html)
+- Check the configuration (see Configuration and Logging below)
+- Run the executable alongside your node and connect using either a RabbitMQ or JS client - see the ClientTest example for an example of an HTML and RabbitMQ client.
+
 ## Alpha
 
 This is an initial release with minimal testing and comes with no guarantees. It is intended at this point in time to garner feature request feedback and identify bugs.
