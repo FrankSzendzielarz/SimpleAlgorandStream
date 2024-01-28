@@ -49,7 +49,7 @@ namespace SimpleAlgorandStream.Services
         private readonly ILogger<StatePumpService> _logger;
         private readonly IHostApplicationLifetime _appLifetime;
         //INFO: push targets cannot be dynamically changed on configuration change
-        private readonly IConnection _rabbitMQConnection;
+        private IConnection _rabbitMQConnection;
         private readonly IHubContext<AlgorandHub> _signalRHub;
 
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
@@ -71,14 +71,14 @@ namespace SimpleAlgorandStream.Services
                 _algodSourceMonitor.OnChange(async _ =>
                 {
                     await setupClient();
+                    setupRabbitMQ();
                 });
                 _logger = logger;
                 _clientFactory = clientFactory;
 
-                var factory = new ConnectionFactory() { HostName = _pushTargetsMonitor.CurrentValue.RabbitMQ.HostName };
-                _rabbitMQConnection = factory.CreateConnection();
+               
                 setupClient().Wait();
-
+                setupRabbitMQ();
 
 
      
@@ -93,7 +93,14 @@ namespace SimpleAlgorandStream.Services
 
         }
 
-
+        private void setupRabbitMQ()
+        {
+            if (_pushTargetsMonitor.CurrentValue.RabbitMQ.Enabled)
+            {
+                var factory = new ConnectionFactory() { HostName = _pushTargetsMonitor.CurrentValue.RabbitMQ.HostName };
+                _rabbitMQConnection = factory.CreateConnection();
+            }
+        }
         
 
         private async Task setupClient()
