@@ -31,16 +31,16 @@
 
         connection.onreconnected((connectionId) => {
             console.assert(connection.state === signalR.HubConnectionState.Connected);
-            //var filter = "Block.block.txns[*].txn.snd | [?@] | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
-            //connection.invoke("SetFilter", filter).then(function (result) {
-            //    if (result) {
-            //        console.log("Filter applied.");
-            //    } else {
-            //        console.log("Filter application failed.");
-            //    }
-            //}).catch(function (err) {
-            //    return console.error(err.toString());
-            //});
+            var filter = "Block.block.txns[*].txn.snd | [?@] | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
+            connection.invoke("SetFilter", filter).then(function (result) {
+                if (result) {
+                    console.log("Filter applied.");
+                } else {
+                    console.log("Filter application failed.");
+                }
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
             console.log(`Connection reestablished. Connected with connectionId "${connectionId}".`);
         });
 
@@ -53,7 +53,7 @@
         async function start() {
             try {
                 await connection.start().then(function () {
-                    return;
+                   
                     var filter = "Block.block.txns[*].txn.snd | [?@] | contains(@, 'aJaVAfWZoKsh6bc7KO1nfiamjthhF844i3txYJTkmVw=')";
                     connection.invoke("SetFilter", filter).then(function (result) {
                         if (result) {
