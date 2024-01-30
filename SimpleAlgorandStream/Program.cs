@@ -45,6 +45,7 @@ namespace SimpleAlgorandStream
                     });
                     services.AddTransient<LoggingHandler>();
                     services.AddHostedService<StatePumpService>();
+                    services.AddHostedService<PrefilterExchangeFinderService>();
                     services.AddHttpClient<StatePumpService>()
                             .AddHttpMessageHandler<LoggingHandler>()
                             .AddPolicyHandler((serviceProvider, x) =>
@@ -54,6 +55,7 @@ namespace SimpleAlgorandStream
                                 var algodSourceConfig = hostContext.Configuration.GetSection("AlgodSource").Get<AlgodSource>() ?? throw new Exception("Cannot start service without AlgodSource configuration");
                                 return configureSourcePolicy(algodSourceConfig, logger);
                             });
+
                     services.Configure<KestrelServerOptions>(options =>
                     {
                         var pushTargetConfig = hostContext.Configuration.GetSection("PushTargets").Get<PushTargets>() ?? throw new Exception("Cannot start service without PushTarget configuration");

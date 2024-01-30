@@ -60,7 +60,6 @@ namespace SimpleAlgorandStream.SignalR
                     var pathExpression = connection.Value;
                     if (pathExpression != null)
                     {
-
                         var token = JToken.Parse(message);
                         var result = pathExpression.Transform(token);
                         if (result.Token.ToString().ToLower() != "true")

@@ -11,6 +11,10 @@ using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using SimpleAlgorandStream.SignalR;
 using Algorand;
+using System.Collections.Concurrent;
+using DevLab.JmesPath.Expressions;
+using Newtonsoft.Json.Linq;
+using System.Xml.XPath;
 
 namespace SimpleAlgorandStream.Services
 {
@@ -40,7 +44,7 @@ namespace SimpleAlgorandStream.Services
 
     internal class StatePumpService : BackgroundService
     {
-        
+        internal static ConcurrentDictionary<string, JmesPathExpression> KnownPrefilterExchanges = new ConcurrentDictionary<string, JmesPathExpression>();
         private readonly IOptionsMonitor<AlgodSource> _algodSourceMonitor;
         private readonly IOptionsMonitor<PushTargets> _pushTargetsMonitor;
         private HttpClient _client;
@@ -253,16 +257,40 @@ namespace SimpleAlgorandStream.Services
                 // RabbitMQ (AMQP)
                 if (_pushTargetsMonitor.CurrentValue.RabbitMQ.Enabled)
                 {
+                    
                     _logger.LogInformation($"Publishing message to RabbitMQ.");
                     using (var channel = _rabbitMQConnection.CreateModel())
                     {
+                        //publish to the main unfiltered exchange
                         channel.ExchangeDeclare(exchange: _pushTargetsMonitor.CurrentValue.RabbitMQ.ExchangeName, type: ExchangeType.Fanout);
-
-
                         channel.BasicPublish(exchange: _pushTargetsMonitor.CurrentValue.RabbitMQ.ExchangeName,
                                              routingKey: "",
                                              basicProperties: null,
                                              body: body);
+
+                        //publish to any client registered prefiltering exchanges
+                        foreach (var exchange in KnownPrefilterExchanges)
+                        {
+                            try
+                            {
+                                var pathExpression = exchange.Value;
+                                var token = JToken.Parse(json);
+                                var result = pathExpression.Transform(token);
+                                if (result.Token.ToString().ToLower() != "true")
+                                {
+
+                                    continue;
+                                }
+                                channel.BasicPublish(exchange: exchange.Key,
+                                                     routingKey: "",
+                                                     basicProperties: null,
+                                                     body: body);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, $"Exchange {exchange.Key} failed to filter message and the message was discarded for that exchange.");
+                            }
+                        }
                     }
                 }
             }catch (Exception ex)
