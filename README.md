@@ -57,11 +57,23 @@ This is AMQP 0.9.1, a messaging protocol.
 Here an 'exchange' is implemented. Block and State Delta messages are pushed to the exchange. Clients can connect to the exchange and bind a 'queue'.
 This means that message delivery is **reliable** and **durable**. If a client is not operational, the message will be queued until the client connects and consumes the message.
 
-With this model, the client is expected to be a server, and responsible for filtering messages it does not need.
+The service offers a default exchange (named by the RabbitMQ.ExchangeName setting in the config).
+Clients to that exchange are expected to be servers  and responsible for filtering messages they do not need.
 
-This can be a useful addition to various solution architectures. For example, you could have a local reactive stream that pre-filters messages, discarding the majority
-of MQ block transactions you don't need, or transform the messages into a different format, before, say, pushing the data to your own web or mobile clients or
-to cloud stream analytics services or databases.
+However, you might want to support remote clients, and blocks are large. Sending blocks to multiple remote clients can be expensive in data egress.
+For this reason, the service also offers support for pre-filtered exchanges.
+These are exchanges created on demand by clients, with a JMESPath pre-filter argument. For example, the client test app creates an exchange
+with a filter for blocks containing transactions from a specific sender:
+
+```csharp
+  Dictionary<string, object> preFilter = new Dictionary<string, object>()
+  {
+      { "prefilter","Block.block.txns[*].txn.snd | [?@] | contains(@, 'Gs6HXQ0r1GuOPxGDjLTu9PhxwLmrDToCmXhzHQisUOU=')" }
+  };
+  channel.ExchangeDeclare(exchange: "AlgorandTest1", type: ExchangeType.Fanout, durable: true, autoDelete: false, preFilter);
+```
+
+Also 
 
 
 #### SignalR
@@ -143,8 +155,11 @@ NB: The AlgodSource section can be updated in realtime.
       "HostName": "localhost",
       "Port": 5672,
       "ExchangeName": "AlgorandFeed",
-      "Enabled":  true // Set to false to disable this target.
-    }
+      "Enabled": true,                                      // Set to false to disable this target.
+      "RMQAPIUserName":  "guest",                           // RMQ server management API username. See https://www.rabbitmq.com/management.html
+      "RMQAPIPassword": "guest",                            // RMQ server management API password. 
+      "RMQAPIPort": 15672,                                  // RMQ server management API port.
+      "PrefilterExchangeDiscoveryFrequency": "00:00:05"     // How often RMQ server management API is contactacted to discover exchanges for pre-filtered messages.
   },
 
   // Microsoft.Extension.Logging configuration section. See https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-7.0
