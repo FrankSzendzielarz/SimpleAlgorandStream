@@ -73,7 +73,7 @@ with a filter for blocks containing transactions from a specific sender:
   channel.ExchangeDeclare(exchange: "AlgorandTest1", type: ExchangeType.Fanout, durable: true, autoDelete: false, preFilter);
 ```
 
-Also 
+Please also see the [JS AMQP client](https://cloudamqp.github.io/amqp-client.js/) for guidance on how to directly consume MQ messages in browser or node.js client.
 
 
 #### SignalR
