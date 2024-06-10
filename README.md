@@ -17,7 +17,7 @@ So far this has been tested on a limited set of data. Logger will output any blo
 
 ## What is it?
 
-This is a .NET Core executable that can run alongside your Algorand node to monitor for changes you are interested in. It pushes those changes, blocks and state deltas, as well formed JSON messages to different types of push target client.
+This is a set of platform specific binaries that can run alongside your Algorand node to monitor for changes you are interested in. It pushes those changes, blocks and state deltas, as well formed JSON messages to different types of push target client.
 
 It supports front end clients and server-to-server communication, and allows for reliable messaging using message queues.
 
